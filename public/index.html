@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🛒 Ak-Shop</title>
+<style>
+body{margin:0;font-family:sans-serif;background:#f4f4f4;color:#111}
+header{background:#1e40af;color:#fff;padding:12px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:12px}
+.card{background:#fff;padding:12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.card img{width:100%;border-radius:12px}
+.price{font-weight:700;color:#22c55e}
+.discount{color:red;text-decoration:line-through;margin-left:6px}
+.cart{position:fixed;bottom:12px;right:12px;background:#fff;padding:12px;width:300px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.25)}
+.cart h3{margin:0 0 6px 0}
+.cart .item{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+button{cursor:pointer;padding:6px 10px;border:none;border-radius:8px;background:#1e40af;color:#fff}
+button.primary{background:#22c55e;color:#041b0c}
+input,textarea{width:100%;margin:2px 0;padding:6px;border-radius:6px;border:1px solid #ccc}
+</style>
+</head>
+<body>
+<header><h1>🛒 Ak-Shop</h1></header>
+<input id="search" placeholder="ابحث عن منتج..." style="width:95%;margin:12px auto;display:block;padding:8px">
+<div id="productGrid" class="grid"></div>
+
+<div class="cart">
+<h3>سلة المشتريات</h3>
+<div id="cartItems"></div>
+<div>الإجمالي: <span id="total">0</span> دج</div>
+<form id="checkoutForm">
+<input name="name" placeholder="الاسم" required>
+<input name="phone" placeholder="رقم الهاتف" required>
+<input name="address" placeholder="عنوان الشحن">
+<button class="primary" type="submit">تأكيد الطلب</button>
+</form>
+</div>
+
+<script>
+const state={products:[],cart:{}};
+
+async function fetchProducts(){
+  const res=await fetch('/api/products');
+  state.products=await res.json();
+  renderProducts();
+  renderCart();
+}
+
+function renderProducts(){
+  const grid=document.getElementById('productGrid');
+  const q=document.getElementById('search').value.toLowerCase();
+  const list=state.products.filter(p=>p.name.toLowerCase().includes(q)||p.description.toLowerCase().includes(q));
+  grid.innerHTML=list.map(p=>`
+    <div class="card">
+      <img src="${p.images?.[0]||''}">
+      <h3>${p.name}</h3>
+      <p>${p.description}</p>
+      <div class="price">${p.discount>0?(p.price-p.discount):p.price} دج ${p.discount>0?`<span class="discount">${p.price}</span>`:''}</div>
+      <button onclick="addToCart('${p._id}','')">أضف للسلة</button>
+    </div>
+  `).join('');
+}
+
+function addToCart(id,color='',qty=1){
+  state.cart[id]=(state.cart[id]||0)+qty;
+  renderCart();
+}
+
+function renderCart(){
+  const container=document.getElementById('cartItems');
+  const entries=Object.entries(state.cart);
+  if(entries.length===0){container.innerHTML='<p>السلة فارغة</p>'; document.getElementById('total').textContent='0'; return;}
+  let total=0;
+  container.innerHTML=entries.map(([id,qty])=>{
+    const p=state.products.find(x=>x._id===id);
+    if(!p) return '';
+    const price=p.discount>0?p.price-p.discount:p.price;
+    total+=price*qty;
+    return `<div class="item">${p.name} - ${qty} × ${price} دج</div>`;
+  }).join('');
+  document.getElementById('total').textContent=total.toFixed(0);
+}
+
+document.getElementById('search').addEventListener('input',renderProducts);
+
+document.getElementById('checkoutForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const formData=new FormData(e.target);
+  const customer={ name:formData.get('name'), phone:formData.get('phone'), address:formData.get('address') };
+  const items=Object.entries(state.cart).map(([id,qty])=>({productId:id,qty}));
+  if(items.length===0) return alert('السلة فارغة');
+  const res=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer,items})});
+  const data=await res.json();
+  if(res.ok){state.cart={}; renderCart(); e.target.reset(); alert('تم إرسال الطلب: '+data._id);}
+  else alert('خطأ');
+});
+
+fetchProducts();
+</script>
+</body>
+</html>
