@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>AK Shop - المنتج</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <h1>AK-SHOP</h1>
+
+  <div class="product">
+    <img src="product.jpg">
+    <h2>اسم المنتج</h2>
+    <p>السعر: 2500 دج</p>
+    <button onclick="showForm()">أطلب الآن</button>
+  </div>
+
+  <form id="orderForm" onsubmit="sendOrder(event)">
+    <input id="name" placeholder="الاسم الكامل" required>
+    <input id="phone" placeholder="رقم الهاتف" required>
+    <input id="wilaya" placeholder="الولاية" required>
+    <input id="address" placeholder="العنوان" required>
+    <input id="color" placeholder="اللون">
+    <input id="size" placeholder="المقاس">
+    <textarea id="note" placeholder="ملاحظة (اختياري)"></textarea>
+
+    <button type="submit">إرسال الطلب</button>
+  </form>
+
+  <script src="script.js"></script>
+</body>
+</html>

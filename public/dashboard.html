@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>الطلبات الجديدة</title>
+</head>
+
+<body>
+  <h2>الطلبات الجديدة</h2>
+
+  <button onclick="logout()">خروج</button>
+
+  <div id="orders"></div>
+
+  <script>
+    if (!localStorage.getItem("logged")) {
+      window.location.href = "login.html";
+    }
+
+    async function loadOrders() {
+      const r = await fetch("http://localhost:5000/api/orders/pending");
+      const orders = await r.json();
+
+      document.getElementById("orders").innerHTML = orders.map(o => `
+        <div style="background:#fff;padding:10px;margin:10px;border-radius:6px;">
+          <b>الاسم:</b> ${o.name}<br>
+          <b>الهاتف:</b> ${o.phone}<br>
+          <b>العنوان:</b> ${o.address}<br>
+          <button onclick="confirm('${o._id}')">تأكيد</button>
+        </div>
+      `).join("");
+    }
+
+    async function confirm(id) {
+      await fetch(`http://localhost:5000/api/orders/confirm/${id}`, { method: "PUT" });
+      loadOrders();
+    }
+
+    function logout() {
+      localStorage.removeItem("logged");
+      window.location.href = "login.html";
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تسجيل الدخول</title>
+</head>
+
+<body>
+  <h2>لوحة التحكم - تسجيل الدخول</h2>
+
+  <input id="username" placeholder="اسم المستخدم">
+  <input id="password" type="password" placeholder="كلمة المرور">
+  <button onclick="login()">دخول</button>
+
+  <script>
+    async function login() {
+      const res = await fetch("http://localhost:5000/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.value,
+          password: password.value
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem("logged", "true");
+        window.location.href = "dashboard.html";
+      } else {
+        alert("معلومات خاطئة!");
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+body {
+  background: #f3f3f3;
+  text-align: center;
+  direction: rtl;
+  font-family: sans-serif;
+}
+
+.product {
+  background: #fff;
+  padding: 20px;
+  margin: auto;
+  width: 300px;
+  border-radius: 10px;
+}
+
+.product img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+form {
+  margin: 20px auto;
+  width: 90%;
+  max-width: 350px;
+  display: none;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+input, textarea, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
